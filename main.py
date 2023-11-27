@@ -8,7 +8,6 @@ st.title('SG Restaurant Suggester')
 input_postal_code = st.text_input('Enter postal code:', key='postal_code')
 
 # Clean and validate postal code
-# Remove non-numeric characters
 cleaned_postal_code = re.sub(r'\D', '', input_postal_code)
 
 if len(cleaned_postal_code) != 6 and input_postal_code != '':
@@ -19,8 +18,6 @@ elif input_postal_code != cleaned_postal_code:
         f"You have input {input_postal_code} but it has been cleaned as {cleaned_postal_code}")
 
 # function to get decompose postal code and use Google Maps API key
-
-print(cleaned_postal_code)
 
 
 def geocode_postal_code(cleaned_postal_code, api_key):
@@ -68,13 +65,20 @@ def display_restaurants(restaurant_list):
         restaurant_list, key=lambda x: x.get('rating', 0), reverse=True)
 
     for restaurant in sorted_restaurants:
-        st.subheader(restaurant['name'])
+        # Get Place ID
+        place_id = restaurant['place_id']
+        profile_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+        st.markdown(f"[{restaurant['name']}]({profile_url})",
+                    unsafe_allow_html=True)
+
         # Display rating if available
         rating = restaurant.get('rating')
         if rating:
             st.write(f"Rating: {rating} / 5 ⭐ ")
         else:
             st.write("Rating: Not available")
+
+        # Display hyperlink
 
 
 # Button to fetch and display restaurants
