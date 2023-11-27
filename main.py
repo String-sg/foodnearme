@@ -4,8 +4,32 @@ from random import sample
 import json
 
 # Streamlit interface
-st.title('Restaurant Suggester')
-postal_code = st.text_input('Enter postal code:')
+st.title('SG Restaurant Suggester')
+postal_code = st.text_input('Enter postal code:', key='postal_code')
+
+
+# Function to clean and validate postal code
+def clean_postal_code(postal_code):
+    # Remove non-numeric characters
+    cleaned_code = re.sub(r'\D', '', postal_code)
+
+    # Check if cleaned code has 6 digits
+    if len(cleaned_code) == 6:
+        return cleaned_code
+    else:
+        raise ValueError("Postal code must be 6 digits.")
+
+
+# Attempt to clean and validate the postal code
+try:
+    postal_code = clean_postal_code(input_postal_code)
+    if input_postal_code != postal_code:
+        st.info(
+            f"You have input {input_postal_code} but it has been cleaned as {postal_code}")
+except ValueError as e:
+    st.error(str(e))
+    postal_code = None  # Set to None to prevent further processing
+
 
 # function to get decompose postal code and use Google Maps API key
 
