@@ -5,35 +5,23 @@ import re
 
 # Streamlit interface
 st.title('SG Restaurant Suggester')
-postal_code = st.text_input('Enter postal code:', key='postal_code')
+input_postal_code = st.text_input('Enter postal code:', key='postal_code')
 
+# Clean and validate postal code
+cleaned_postal_code = re.sub(r'\D', '', input_postal_code)
 
-# Function to clean and validate postal code
-def clean_postal_code(postal_code):
-    # Remove non-numeric characters
-    cleaned_code = re.sub(r'\D', '', postal_code)
-
-    # Check if cleaned code has 6 digits
-    if len(cleaned_code) == 6:
-        return cleaned_code
-    else:
-        raise ValueError("Postal code must be 6 digits.")
-
-
-try:
-    cleaned_postal_code = clean_postal_code(postal_code)
-    if postal_code != cleaned_postal_code:
-        st.info(
-            f"You have input {postal_code} but it has been cleaned as {cleaned_postal_code}")
-except ValueError as e:
-    st.warning(str(e))
-    cleaned_postal_code = None
+if len(cleaned_postal_code) != 6 and input_postal_code != '':
+    st.warning("Postal code must be 6 digits.")
+    cleaned_postal_code = None  # Invalidate if not 6 digits
+elif input_postal_code != cleaned_postal_code:
+    st.info(
+        f"You have input {input_postal_code} but it has been cleaned as {cleaned_postal_code}")
 
 # function to get decompose postal code and use Google Maps API key
 
 
-def geocode_postal_code(postal_code, api_key):
-    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={postal_code}&key={api_key}"
+def geocode_postal_code(cleaned_postal_code, api_key):
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={cleaned_postal_code}&key={api_key}"
 
     response = requests.get(geocode_url)
     if response.status_code == 200:
@@ -50,11 +38,11 @@ def geocode_postal_code(postal_code, api_key):
 # Function to get restaurants
 
 
-def get_restaurants(postal_code):
+def get_restaurants(cleaned_postal_code):
     # Convert postal code to coordinates (latitude and longitude)
     # This can be done using a geocoding API or a service
     api_key = st.secrets["google_api_key"]
-    coordinates = geocode_postal_code(postal_code, api_key)
+    coordinates = geocode_postal_code(cleaned_postal_code, api_key)
 
     # Use the Places API to find restaurants within 2km of the coordinates
     places_url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={coordinates}&radius=2000&type=restaurant&key={api_key}"
@@ -62,8 +50,9 @@ def get_restaurants(postal_code):
     response = requests.get(places_url)
     results = response.json()['results']
 
-    # Randomly select 5 restaurants
-    restaurant_sample = sample(results, 5)
+    # Sample up to 5 restaurants, or fewer if not enough results
+    num_restaurants_to_sample = min(5, len(results))
+    restaurant_sample = sample(results, num_restaurants_to_sample)
 
     return restaurant_sample
 
@@ -76,13 +65,20 @@ def display_restaurants(restaurant_list):
         restaurant_list, key=lambda x: x.get('rating', 0), reverse=True)
 
     for restaurant in sorted_restaurants:
-        st.subheader(restaurant['name'])
+        # Get Place ID
+        place_id = restaurant['place_id']
+        profile_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+        st.markdown(f"[{restaurant['name']}]({profile_url})",
+                    unsafe_allow_html=True)
+
         # Display rating if available
         rating = restaurant.get('rating')
         if rating:
             st.write(f"Rating: {rating} / 5 ⭐ ")
         else:
             st.write("Rating: Not available")
+
+        # Display hyperlink
 
 
 # Button to fetch and display restaurants
