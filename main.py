@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from random import sample
-import json
+import re
 
 # Streamlit interface
 st.title('SG Restaurant Suggester')
@@ -20,16 +20,14 @@ def clean_postal_code(postal_code):
         raise ValueError("Postal code must be 6 digits.")
 
 
-# Attempt to clean and validate the postal code
 try:
-    postal_code = clean_postal_code(input_postal_code)
-    if input_postal_code != postal_code:
+    cleaned_postal_code = clean_postal_code(postal_code)
+    if postal_code != cleaned_postal_code:
         st.info(
-            f"You have input {input_postal_code} but it has been cleaned as {postal_code}")
+            f"You have input {postal_code} but it has been cleaned as {cleaned_postal_code}")
 except ValueError as e:
-    st.error(str(e))
-    postal_code = None  # Set to None to prevent further processing
-
+    st.warning(str(e))
+    cleaned_postal_code = None
 
 # function to get decompose postal code and use Google Maps API key
 
@@ -88,6 +86,9 @@ def display_restaurants(restaurant_list):
 
 
 # Button to fetch and display restaurants
-if st.button('Find Restaurants'):
-    restaurants = get_restaurants(postal_code)
-    display_restaurants(restaurants)
+if cleaned_postal_code and st.button('Find Restaurants'):
+    try:
+        restaurants = get_restaurants(cleaned_postal_code)
+        display_restaurants(restaurants)
+    except Exception as e:
+        st.error(f"Error: {e}")
