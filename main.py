@@ -2,6 +2,11 @@ import streamlit as st
 import requests
 from random import sample
 import re
+from streamlit_star_rating import st_star_rating
+
+# Initialize session state
+if 'restaurants' not in st.session_state:
+    st.session_state['restaurants'] = None
 
 # Streamlit interface
 st.title('SG Restaurant Suggester')
@@ -84,7 +89,12 @@ def display_restaurants(restaurant_list):
 # Button to fetch and display restaurants
 if cleaned_postal_code and st.button('Find Restaurants'):
     try:
-        restaurants = get_restaurants(cleaned_postal_code)
-        display_restaurants(restaurants)
+        st.session_state['restaurants'] = get_restaurants(cleaned_postal_code)
     except Exception as e:
         st.error(f"Error: {e}")
+
+if st.session_state['restaurants']:
+    display_restaurants(st.session_state['restaurants'])
+    st.markdown("""---""")
+    stars = st_star_rating("Please rate you experience",
+                           maxValue=10, defaultValue=5, key="rating")
