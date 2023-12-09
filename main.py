@@ -16,6 +16,22 @@ if not database_url:
 
 conn = psycopg2.connect(database_url)
 
+# This was used to construct the path to the certificate file
+# cert_path = os.path.join(os.getenv("HOME"), ".postgresql", "root.crt")
+
+# Read and print the certificate content
+# with open(cert_path, "r") as cert_file:
+#    print(cert_file.read())
+
+# Read the certificate content from st.secrets
+cert_content = st.secrets["database"]["certificate"]
+
+# Write the certificate to a temporary file at runtime
+temp_cert_path = "/tmp/root.crt"
+with open(temp_cert_path, "w") as temp_cert_file:
+    temp_cert_file.write(cert_content)
+
+# Use the cert_content as needed
 # Initialize session state
 if 'restaurants' not in st.session_state:
     st.session_state['restaurants'] = None
