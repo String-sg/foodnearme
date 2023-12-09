@@ -4,10 +4,13 @@ from random import sample
 import re
 from streamlit_star_rating import st_star_rating
 from sqlalchemy import create_engine
-
+import os
 import psycopg2
 
-conn = psycopg2.connect(st.secrets["DATABASE_URL"])
+# Get DATABASE_URL from environment variable or st.secrets
+database_url = os.getenv("DATABASE_URL", st.secrets.get("DATABASE_URL"))
+
+conn = psycopg2.connect(database_url)
 
 # Initialize session state
 if 'restaurants' not in st.session_state:
