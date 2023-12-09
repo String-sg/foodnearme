@@ -136,20 +136,36 @@ if cleaned_postal_code and st.button('Find Restaurants'):
     except Exception as e:
         st.error(f"Error: {e}")
 
+
+# STATE HANDLING (1): Restaurants
 if st.session_state['restaurants']:
     display_restaurants(st.session_state['restaurants'])
     st.markdown("""---""")
-    # Use a callback mechanism or check for change in value
-    rating = st_star_rating("Please rate your experience",
-                            maxValue=10, defaultValue=0, key="rating")
 
-    # Check if a rating is selected
-    if rating:
-        # Insert the rating into the database
-        insert_rating(rating)
+    # Allow rating only if it has not been submitted yet
+    if not st.session_state['rating_submitted']:
+        rating = st_star_rating(
+            "Please rate your experience", maxValue=10, defaultValue=0, key="rating")
+
+        # Check if a rating is selected
+        if rating:
+            # Insert the rating into the database
+            insert_rating(rating)
+            avg_rating = get_average_rating()
+            if avg_rating is not None:
+                st.success(
+                    f'Thank you for your review! The average rating is {avg_rating:.2f}/10.')
+            else:
+                st.info("No ratings available yet.")
+
+            # Update the flag in session state
+            st.session_state['rating_submitted'] = True
+    else:
         avg_rating = get_average_rating()
-        if avg_rating is not None:
-            st.success(
-                f'Thank you for your review! The average rating is {avg_rating:.2f}/10.')
-        else:
-            st.info("No ratings available yet.")
+        st.info(
+            f'You have already submitted a rating (average rating is {avg_rating:.2f}/10). Thank you!')
+
+
+# STATE HANDLING (2): Star ratings
+if 'rating_submitted' not in st.session_state:
+    st.session_state['rating_submitted'] = False
