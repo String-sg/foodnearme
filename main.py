@@ -91,7 +91,7 @@ def get_restaurants(cleaned_postal_code):
     api_key = st.secrets["google_api_key"]
     coordinates = geocode_postal_code(cleaned_postal_code, api_key)
 
-    # Use the Places API to find restaurants within 2km of the coordinates
+    # Use the Places API to find restaurants within 1km of the coordinates
     places_url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={coordinates}&radius=1000&type=restaurant&key={api_key}"
 
     response = requests.get(places_url)
@@ -139,9 +139,13 @@ if cleaned_postal_code and st.button('Find Restaurants'):
 if st.session_state['restaurants']:
     display_restaurants(st.session_state['restaurants'])
     st.markdown("""---""")
+    # Use a callback mechanism or check for change in value
     rating = st_star_rating("Please rate your experience",
-                            maxValue=10, defaultValue=5, key="rating")
-    if st.button('Submit Review'):
+                            maxValue=10, defaultValue=0, key="rating")
+
+    # Check if a rating is selected
+    if rating:
+        # Insert the rating into the database
         insert_rating(rating)
         avg_rating = get_average_rating()
         if avg_rating is not None:
