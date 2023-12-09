@@ -32,7 +32,7 @@ if 'restaurants' not in st.session_state:
     st.session_state['restaurants'] = None
 
 # Streamlit interface
-st.title('SG Restaurant Suggester')
+st.title('Discover Food Near Me')
 input_postal_code = st.text_input('Enter postal code:', key='postal_code')
 
 # Clean and validate postal code
