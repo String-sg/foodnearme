@@ -3,6 +3,11 @@ import requests
 from random import sample
 import re
 from streamlit_star_rating import st_star_rating
+from sqlalchemy import create_engine
+
+import psycopg2
+
+conn = psycopg2.connect(st.secrets["DATABASE_URL"])
 
 # Initialize session state
 if 'restaurants' not in st.session_state:
@@ -21,6 +26,43 @@ if len(cleaned_postal_code) != 6 and input_postal_code != '':
 elif input_postal_code != cleaned_postal_code:
     st.info(
         f"You have input {input_postal_code} but it has been cleaned as {cleaned_postal_code}")
+
+# for users planning to fork this + replace with their own DB, this ensures that the  table is created
+
+
+# Function to execute a query
+def execute_query(query, params=None, is_select=False):
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            if is_select:
+                return cur.fetchall()
+
+
+def create_ratings_table():
+    create_table_query = '''
+    CREATE TABLE IF NOT EXISTS ratings (
+        id SERIAL PRIMARY KEY,
+        rating INT NOT NULL
+    )
+    '''
+    execute_query(create_table_query)
+
+
+# this function runs to ensure that the table ratings exist
+create_ratings_table()
+
+
+# Function to insert a rating
+def insert_rating(rating):
+    execute_query('INSERT INTO ratings (rating) VALUES (%s)', (rating,))
+
+# Function to get the average rating
+
+
+def get_average_rating():
+    result = execute_query('SELECT AVG(rating) FROM ratings', is_select=True)
+    return result[0][0] if result else None
 
 # function to get decompose postal code and use Google Maps API key
 
@@ -76,10 +118,11 @@ def display_restaurants(restaurant_list):
         st.markdown(f"[{restaurant['name']}]({profile_url})",
                     unsafe_allow_html=True)
 
-        # Display rating if available
+        # Display rating and number of reviews if available
         rating = restaurant.get('rating')
+        num_reviews = restaurant.get('user_ratings_total', 'Not available')
         if rating:
-            st.write(f"Rating: {rating} / 5 ⭐ ")
+            st.write(f"Rating: {rating} / 5 ⭐ ({num_reviews})")
         else:
             st.write("Rating: Not available")
 
@@ -96,5 +139,13 @@ if cleaned_postal_code and st.button('Find Restaurants'):
 if st.session_state['restaurants']:
     display_restaurants(st.session_state['restaurants'])
     st.markdown("""---""")
-    stars = st_star_rating("Please rate you experience",
-                           maxValue=10, defaultValue=5, key="rating")
+    rating = st_star_rating("Please rate your experience",
+                            maxValue=10, defaultValue=5, key="rating")
+    if st.button('Submit Review'):
+        insert_rating(rating)
+        avg_rating = get_average_rating()
+        if avg_rating is not None:
+            st.success(
+                f'Thank you for your review! The average rating is {avg_rating:.2f}/10.')
+        else:
+            st.info("No ratings available yet.")
