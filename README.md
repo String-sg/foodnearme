@@ -1,6 +1,6 @@
 # Food Near Me
 Find nearby food by inputting a postal code
-<img width="944" alt="image" src="https://github.com/String-sg/foodnearme/assets/44336310/d5738abd-8e62-4d93-9ef9-ca04b37585a0">
+![image](https://github.com/String-sg/foodnearme/assets/44336310/dfddde7c-8d7c-41bb-a859-e3b18b10b08e)
 
 ### To setup locally
 - Clone the repository
