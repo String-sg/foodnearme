@@ -35,7 +35,7 @@ if 'restaurants' not in st.session_state:
 # Streamlit interface
 st.set_page_config(
     page_title="Discover Food Near Me",
-    page_icon="flag-sg",
+    page_icon="shallow_pan_of_food",
 )
 
 
