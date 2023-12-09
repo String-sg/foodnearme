@@ -92,7 +92,7 @@ def get_restaurants(cleaned_postal_code):
     coordinates = geocode_postal_code(cleaned_postal_code, api_key)
 
     # Use the Places API to find restaurants within 2km of the coordinates
-    places_url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={coordinates}&radius=2000&type=restaurant&key={api_key}"
+    places_url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={coordinates}&radius=1000&type=restaurant&key={api_key}"
 
     response = requests.get(places_url)
     results = response.json()['results']
