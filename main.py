@@ -205,3 +205,11 @@ if st.session_state['restaurants']:
 # STATE HANDLING (2): Star ratings
 if 'rating_submitted' not in st.session_state:
     st.session_state['rating_submitted'] = False
+
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
