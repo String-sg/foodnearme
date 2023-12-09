@@ -7,12 +7,15 @@ from sqlalchemy import create_engine
 import os
 import psycopg2
 
-# Attempt to get the database URL from environment variable first
-database_url = os.getenv("DATABASE_URL")
+# Read the certificate content from st.secrets
+cert_content = st.secrets["database"]["certificate"]
 
-# If not found, fallback to st.secrets
-if not database_url:
-    database_url = st.secrets.get("DATABASE_URL")
+# Write the certificate to a temporary file at runtime
+temp_cert_path = "/tmp/root.crt"
+with open(temp_cert_path, "w") as temp_cert_file:
+    temp_cert_file.write(cert_content)
+
+database_url = st.secrets.get("DATABASE_URL2")+temp_cert_path
 
 conn = psycopg2.connect(database_url)
 
@@ -22,14 +25,6 @@ conn = psycopg2.connect(database_url)
 # Read and print the certificate content
 # with open(cert_path, "r") as cert_file:
 #    print(cert_file.read())
-
-# Read the certificate content from st.secrets
-cert_content = st.secrets["database"]["certificate"]
-
-# Write the certificate to a temporary file at runtime
-temp_cert_path = "/tmp/root.crt"
-with open(temp_cert_path, "w") as temp_cert_file:
-    temp_cert_file.write(cert_content)
 
 # Use the cert_content as needed
 # Initialize session state
