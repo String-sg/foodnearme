@@ -6,7 +6,6 @@ from streamlit_star_rating import st_star_rating
 from sqlalchemy import create_engine
 import os
 import psycopg2
-from urllib.parse import quote
 
 # Read the certificate content from st.secrets
 cert_content = st.secrets["database"]["certificate"]
@@ -150,8 +149,7 @@ def display_restaurants(restaurant_list):
     for restaurant in sorted_restaurants:
         # Get Place ID
         place_id = restaurant['place_id']
-        encoded_place_id = quote(place_id)
-        profile_url = f"https://www.google.com/maps/place/?q=place_id:{encoded_place_id}"
+        profile_url = f"https://www.google.com/maps/search/?api=1&query=Google&query_place_id={place_id}"
         st.markdown(f"[{restaurant['name']}]({profile_url})",
                     unsafe_allow_html=True)
 
