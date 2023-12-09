@@ -7,8 +7,12 @@ from sqlalchemy import create_engine
 import os
 import psycopg2
 
-# Get DATABASE_URL from environment variable or st.secrets
-database_url = os.getenv("DATABASE_URL", st.secrets.get("DATABASE_URL"))
+# Attempt to get the database URL from environment variable first
+database_url = os.getenv("DATABASE_URL")
+
+# If not found, fallback to st.secrets
+if not database_url:
+    database_url = st.secrets.get("DATABASE_URL")
 
 conn = psycopg2.connect(database_url)
 
