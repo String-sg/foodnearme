@@ -31,8 +31,25 @@ conn = psycopg2.connect(database_url)
 if 'restaurants' not in st.session_state:
     st.session_state['restaurants'] = None
 
+
 # Streamlit interface
-st.title('SG Restaurant Suggester')
+st.set_page_config(
+    page_title="Discover Food Near Me",
+    page_icon="shallow_pan_of_food",
+)
+
+
+custom_css = """
+<style>
+    .streamlit_star_rating.st_star_rating { 
+        transform: scale(0.6); 
+        transform-origin: center; 
+    }
+</style>
+"""
+
+st.markdown("<h1>🇸🇬 Discover Food Near Me </h1>",
+            unsafe_allow_html=True)
 input_postal_code = st.text_input('Enter postal code:', key='postal_code')
 
 # Clean and validate postal code
@@ -109,7 +126,7 @@ def get_restaurants(cleaned_postal_code):
     api_key = st.secrets["google_api_key"]
     coordinates = geocode_postal_code(cleaned_postal_code, api_key)
 
-    # Use the Places API to find restaurants within 1km of the coordinates
+    # Use the Places API to find food within 1km of the coordinates
     places_url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={coordinates}&radius=1000&type=restaurant&key={api_key}"
 
     response = requests.get(places_url)
@@ -148,12 +165,13 @@ def display_restaurants(restaurant_list):
 
 
 # Button to fetch and display restaurants
-if cleaned_postal_code and st.button('Find Restaurants'):
+if cleaned_postal_code and st.button('Discover'):
     try:
         st.session_state['restaurants'] = get_restaurants(cleaned_postal_code)
     except Exception as e:
         st.error(f"Error: {e}")
 
+st.markdown(custom_css, unsafe_allow_html=True)
 
 # STATE HANDLING (1): Restaurants
 if st.session_state['restaurants']:
@@ -163,7 +181,7 @@ if st.session_state['restaurants']:
     # Allow rating only if it has not been submitted yet
     if not st.session_state['rating_submitted']:
         rating = st_star_rating(
-            "Please rate your experience", maxValue=10, defaultValue=0, key="rating")
+            "Please rate your experience", maxValue=10, defaultValue=0, size=20, key="rating")
 
         # Check if a rating is selected
         if rating:
