@@ -21,7 +21,7 @@ See instructions on [streamlit](https://streamlit.io/cloud)
 
 ### Why this repo exists?
 Prepared for OGP mentorship as a way to explain:
-[x] 1) Making API calls (Google Places)
-[x] 2) Deploying to web (Streamlit)
-[x] 3) Connecting to a backend (CockroachDB)/ Implementing a review system
+1) Making API calls (Google Places)
+2) Deploying to web (Streamlit)
+3) Connecting to a backend (CockroachDB)/ Implementing a review system
 4) Using a ORM/ SQLalchemy (in progress)
